@@ -60,7 +60,6 @@ This project aims to explore the intersection of technology and poetry by utiliz
 ### Contributors:
 
 *   \[Your Name or Team Name\]
-    
 
 ### License:
 
