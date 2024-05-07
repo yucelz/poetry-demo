@@ -33,7 +33,7 @@ jobs:
           poetry config virtualenvs.create false
           poetry install
       - name: Unit tests
-        run: poetry run pytest -vvv --cov=tryceratops --cov-report=xml
+        run: poetry run pytest
 
       - name: Lint
         uses: pre-commit/action@v2.0.3
