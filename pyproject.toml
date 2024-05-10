@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "poetry-demo"
-version = "0.1.1"
+version = "0.1.2"
 description = "Library of code for working with shapes"
 authors = ["yucelz <yucelz@gmail.com>"]
 readme = "README.md"
