@@ -4,6 +4,7 @@ version = "0.1.2"
 description = "Library of code for working with shapes"
 authors = ["yucelz <yucelz@gmail.com>"]
 readme = "README.md"
+packages = [{include = "poetry_demo"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
