@@ -6,34 +6,40 @@ on:
       - master  # Change this to your main branch
 
 jobs:
-  release:
-    name: Create Release
+  quality_check:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    strategy:
+      matrix:
+        python-version: [ "3.9", "3.10"]
 
-      - name: Set up Python
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
-
-      - name: Create Version Tag
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+      - name: Install dependencies
         run: |
-          VERSION=$(poetry version -s)
-          git tag -a $VERSION -m "Release $VERSION"
-
-      - name: Push Tag to GitHub
-        if: success()
-        run: |
-          git push origin $VERSION
-
-      - name: Create Release
-        if: success()
-        uses: softprops/action-gh-release@v1
+          python -m pip install --upgrade pip
+          poetry config virtualenvs.create false
+          poetry install
+      - name: Unit tests
+        run: poetry run pytest
+  Release:
+    needs: quality_check
+    # https://github.community/t/how-do-i-specify-job-dependency-running-in-another-workflow/16482
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && !contains(github.event.head_commit.message, 'chore(release):')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
         with:
-          files: dist/*
-          tag_name: $VERSION
-          title: Release $VERSION
-          body: |
-            Release $VERSION
+          python-version: '3.9'
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Python Semantic Release
+        uses: python-semantic-release/python-semantic-release@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
