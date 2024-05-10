@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main  # Change this to your main branch
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+          source $HOME/.poetry/env
+          poetry --version
+
+      - name: Install Dependencies
+        run: poetry install
+
+      - name: Build
+        run: poetry build
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Create Version Tag
+        run: |
+          VERSION=$(poetry version -s)
+          git tag -a $VERSION -m "Release $VERSION"
+
+      - name: Push Tag to GitHub
+        if: success()
+        run: |
+          git push origin $VERSION
+
+      - name: Create Release
+        if: success()
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
+          tag_name: $VERSION
+          title: Release $VERSION
+          body: |
+            Release $VERSION
